@@ -18,11 +18,12 @@ LOGSTASH_CONF = "/etc/logstash-forwarder.conf"
 
 import hjson
 import sys
+import time
 import traceback
 import lumberjack
 
 from datetime import datetime
-from lumberjack import Client
+from lumberjack.client import Client
 
 DEFAULT_CONFIG = {
                   'network': {
@@ -103,7 +104,7 @@ def _convert_message(message):
           'file':     message['PROGRAM'],
           'offset':   message['SEQNUM'],
           'facility': message['FACILITY'],
-          'priorty':  message['PRIORITY'],
+          'priority': message['PRIORITY'],
           'date':     message['DATE'] or _date_now(),
           'syslog-ng': {
             'host':       message['HOST'],
@@ -115,11 +116,11 @@ def _convert_message(message):
   }, frozenset(['line', 'host', 'file', 'offset']))
   return result
 
-def _remove_none_values(dict, preserve_keys = frozenset()):
-  if hasattr(dict, "iteritems") and callable(getattr(dict, "iteritems")):
-    return {k: _remove_none_values(v, preserve_keys) for k, v in dict.iteritems() 
+def _remove_none_values(d, preserve_keys = frozenset()):
+  if hasattr(d, "iteritems") and callable(getattr(d, "iteritems")):
+    return {k: _remove_none_values(v, preserve_keys) for k, v in d.iteritems() 
             if v is not None or k in preserve_keys}
-  return dict
+  return d
 
 def _date_now():
   now = datetime.now()
@@ -145,8 +146,12 @@ def main(args):
                'MESSAGE':    line
     }
     queue(message)
+    time.sleep(0.2)
+  #print("All messages sent; sleeping forever")
+  #while True:
+  #  time.sleep(1)
+  print("All messages sent; waiting for shutdown")
   deinit(graceful = True)
 
 if __name__ == "__main__":
-  import sys
   main(sys.argv[1:])

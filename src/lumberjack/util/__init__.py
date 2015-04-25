@@ -1,5 +1,3 @@
-from pprint import pprint
-
 def flatten(d, parent_key='', sep='.'):
   items = []
   for k, v in d.items():
@@ -11,7 +9,7 @@ def flatten(d, parent_key='', sep='.'):
       items.append((new_key, v))
   return dict(items)
 
-def strlen(str):
-  if isinstance(str, unicode):
-      return len(str)
-  return len(str)
+def strlen(s):
+  if isinstance(s, unicode):
+      return len(b'{0}'.format(s))
+  return len(s)
